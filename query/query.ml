@@ -14,64 +14,21 @@ let collapse_occ ~count occs =
     (fun k x acc -> if k < count then acc else Succ.union (Succ.of_array x) acc)
     occs Succ.empty
 
-let collapse_trie_occ ~count t =
-  t |> Tree_occ.to_sets
-  |> List.fold_left
-       (fun succ occ -> Succ.union succ (collapse_occ ~count occ))
-       Succ.empty
+let collapse_tree_occ ~count t =
+  t |> Tree_occ.immediate_sets |> collapse_occ ~count
 
-let collapse_trie t =
-  t |> Tree.to_sets
-  |> List.fold_left
-       (fun succ arr -> Succ.union succ (Succ.of_array arr))
-       Succ.empty
+let collapse_tree_occ_polar ~count ~polarity t =
+  t
+  |> Tree_occ.sets_with_parent ~parent:polarity
+  |> List.map (collapse_occ ~count)
+  |> Succ.union_of_list
 
-(*let rec collapse_trie_occ_polar ~parent_char ~polarity ~count t =
-    let open Tree in
-    match t with
-    | Leaf (_, leaf) ->
-        if parent_char = polarity then collapse_occ ~count leaf else Succ.empty
-    | Node { leaf = _; children; _ } ->
-        Char.Map.fold
-          (fun parent_char child acc ->
-            let res =
-              collapse_trie_occ_polar ~parent_char ~polarity ~count child
-            in
-            Succ.union acc res)
-          children Succ.empty
+let collapse_tree t =
+  let t = Tree.to_sets t in
+  let t = List.map Succ.of_array t in
+  let t = Succ.union_of_list t in
+  t
 
-
-  let collapse_trie_occ_polar ~polarity ~count t =
-    let open Tree in
-    match t with
-    | Leaf _ -> Succ.empty
-    | Node { leaf = _; children; _ } ->
-        Char.Map.fold
-          (fun parent_char child acc ->
-            let res =
-              collapse_trie_occ_polar ~parent_char ~polarity ~count child
-            in
-            Succ.union acc res)
-          children Succ.empty
-
-  let collapse_trie_with_poly ~count name t =
-    match name with
-    | [ "POLY"; ("+" | "-") ] -> begin
-        match t with
-        | Tree.Leaf ([], s) | Node { leaf = Some s; _ } -> collapse_occ ~count s
-        | _ -> Succ.empty
-      end
-    | _ -> collapse_trie_occ ~count t
-
-  let _collapse_trie_with_poly_polar ~polarity ~count name t =
-    match name with
-    | [ "POLY"; ("+" | "-") ] -> begin
-        match t with
-        | Tree.Leaf ([], s) | Node { leaf = Some s; _ } -> collapse_occ ~count s
-        | _ -> Succ.empty
-      end
-    | _ -> collapse_trie_occ_polar ~polarity ~count t
-*)
 let find_types ~shards names =
   List.fold_left
     (fun acc shard ->
@@ -82,26 +39,25 @@ let find_types ~shards names =
              (fun (name, count) ->
                let name' = String.concat "" name in
                match Tree_occ.find db name' with
-               | Some trie -> collapse_trie_occ ~count trie
-               | None -> Succ.empty
-               (*
-               | Error (`Stopped_at (i, sub_trie)) ->
-                   let name_str = name' |> List.to_seq |> String.of_seq in
-                   if i = String.length name_str - 1
+               | Ok tree -> collapse_tree_occ ~count tree
+               | Error (`Stopped_at (i, sub_tree)) ->
+                   if i = String.length name' - 1
                    then
-                     let polarity = name_str.[i] in
+                     let polarity = name'.[i] in
                      match polarity with
                      | '-' | '+' ->
-                         collapse_trie_occ_polar ~polarity ~count sub_trie
+                         collapse_tree_occ_polar ~polarity ~count sub_tree
                      | _ -> Succ.empty
-                   else Succ.empty*))
+                   else Succ.empty)
              (regroup names)
       in
       Succ.union acc r)
     Succ.empty shards
 
 let find_names ~(shards : Db.t list) names =
-  let names = List.map (fun n -> (*String.rev *)(String.lowercase_ascii n)) names in
+  let names =
+    List.map (fun n -> (*String.rev *) String.lowercase_ascii n) names
+  in
   List.fold_left
     (fun acc shard ->
       let db_names = shard.db_names in
@@ -109,8 +65,8 @@ let find_names ~(shards : Db.t list) names =
         List.map
           (fun name ->
             match Tree.find db_names name with
-            | Some trie -> collapse_trie trie
-            | None -> Succ.empty)
+            | Ok tree -> collapse_tree tree
+            | Error _ -> Succ.empty)
           names
       in
       let candidates = inter_list candidates in

@@ -340,13 +340,14 @@ module Make (S : SET) = struct
       let array_find ~str chr arr =
         let rec go i =
           if i >= Array.length arr
-          then raise Not_found
+          then None
           else
             let node = arr.(i) in
-            if chr = str.[node.start - 1] then node else go (i + 1)
+            if chr = str.[node.start - 1] then Some node else go (i + 1)
         in
         go 0
 
+      (** length of the longest common prefix between substrings *)
       let lcp i_str i j_str j j_len =
         let j_stop = j + j_len in
         let rec go_lcp i j =
@@ -361,33 +362,43 @@ module Make (S : SET) = struct
 
       let rec find ~str node pattern i =
         if i >= String.length pattern
-        then node
+        then Ok node
         else
           let chr = pattern.[i] in
-          let child = array_find ~str chr node.children in
-          find_lcp ~str child pattern (i + 1)
+          match array_find ~str chr node.children with
+          | None -> Error (`Stopped_at (i, { str; t = node }))
+          | Some child -> find_lcp ~str child pattern (i + 1)
 
       and find_lcp ~str child pattern i =
         let n = lcp pattern i str child.start child.len in
         if i + n = String.length pattern
-        then { child with start = child.start + n }
+        then Ok { child with start = child.start + n }
         else if n = child.len
         then find ~str child pattern (i + n)
-        else raise Not_found
+        else Error (`Stopped_at (i + n, { str; t = child }))
 
       let find t pattern =
-        let child = find ~str:t.str t.t pattern 0 in
+        let open Result.O in
+        let+ child = find ~str:t.str t.t pattern 0 in
         { str = t.str; t = child }
-
-      let find t pattern = 
-        print_endline pattern;
-        try Some (find t pattern) with Not_found -> None
 
       let rec collapse acc t =
         let acc = if S.is_empty t.terminals then acc else t.terminals :: acc in
         Array.fold_left collapse acc t.children
 
       let collapse t = collapse [] t.t
+      let immediate_sets t = t.t.terminals
+
+      let rec collapse_with_parent ~str ~parent acc
+          { start; len; terminals; children } =
+        let start, len = if start = 0 then start, len else start - 1, len + 1 in
+        let last = str.[start + len - 1] in
+        match children with
+        | [||] when parent = last -> terminals :: acc
+        | _ -> Array.fold_left (collapse_with_parent ~str ~parent) acc children
+
+      let collapse_with_parent ~parent { str; t } =
+        collapse_with_parent ~str ~parent [] t
     end
 
     let export_terminals ~cache_term ts =
@@ -428,14 +439,17 @@ module Make (S : SET) = struct
     let pprint T.{ t; str } =
       let open PPrint in
       let rec node T.{ start; len; terminals; children } =
-        let start, len = if start = 0 then start, len else start - 1 , len + 1 in
-        OCaml.string (String.sub str start (len )) ^^ space
-        ^^ align (S.pprint terminals) ^^ break 1
+        let start, len = if start = 0 then start, len else start - 1, len + 1 in
+        group
+          (OCaml.string (String.sub str start len)
+          ^^ break 1
+          ^^ align (S.pprint terminals))
+        ^^ break 1
         ^^ nest 4
              (group
-                (Array.fold_left
-                   (fun doc n -> doc ^^ break 1 ^^ group (node n))
-                   (empty) children))
+                (children |> Array.to_list
+                |> separate_map (break 1) (fun n ->
+                       ifflat (group (brackets (node n))) (group (node n)))))
       in
       node t
   end
@@ -450,7 +464,14 @@ module Make (S : SET) = struct
 
   let find = Automata.T.find
   let to_sets = Automata.T.collapse
+  let immediate_sets = Automata.T.immediate_sets
+  let sets_with_parent ~parent = Automata.T.collapse_with_parent ~parent
 end
 
-module With_elts = Make (Elt.Array)
+module With_elts = Make (struct
+  include Elt.Array
+
+  let of_list li = li |> of_list |> Cache.Elt_array.memo
+end)
+
 module With_occ = Make (Occ)

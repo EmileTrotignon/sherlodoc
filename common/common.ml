@@ -11,3 +11,4 @@ module Option = Option
 module Set = Set
 module String_list_map = String_list_map
 module String = String
+module Result = Result

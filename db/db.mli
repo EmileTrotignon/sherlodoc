@@ -2,6 +2,7 @@ module Elt = Elt
 module Types = Types
 module Storage = Storage
 module Suffix_tree = Suffix_tree
+module Cache = Cache
 
 type t = Types.t =
 

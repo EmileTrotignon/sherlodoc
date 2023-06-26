@@ -1,5 +1,6 @@
 module Elt = Db.Elt
 module Db_common = Db
+module Cache = Db.Cache
 
 module Make (Storage : Db.Storage.S) = struct
   module Types = Db.Types
@@ -195,7 +196,7 @@ module Make (Storage : Db.Storage.S) = struct
         Elt.Kind.extension_constructor paths
     | ModuleType -> ModuleType
 
-  let convert_kind k = k |> convert_kind (*|> Cache.Kind_.memo*)
+  let convert_kind k = k |> convert_kind (*|> Cache.Kind.memo*)
 
   let register_type_expr elt type_ =
     let type_paths = type_paths ~prefix:[] ~sgn:Pos type_ in

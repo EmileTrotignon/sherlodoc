@@ -7,19 +7,9 @@
   $ du -sh megaodocl
   12K	megaodocl
   $ sherlodoc_index --format=js --db=db.js $(find . -name '*.odocl') 2> /dev/null
-  Index_lib.main
-  Indexing in 0.002069s
-  trie_with_array_occ:0.00s
-  trie_with_array:0.00s
-  Cache.Elt_array_occ_trie.memo:0.00s
-  Cache.Elt_array_trie.memo:0.00s
+  Indexing in 0.001074s
   $ sherlodoc_index --format=marshal --db=sherlodoc_db.bin $(find . -name '*.odocl') 2> /dev/null
-  Index_lib.main
-  Indexing in 0.001399s
-  trie_with_array_occ:0.00s
-  trie_with_array:0.00s
-  Cache.Elt_array_occ_trie.memo:0.00s
-  Cache.Elt_array_trie.memo:0.00s
+  Indexing in 0.001001s
 $ sherlodoc_index --format=js --empty-payload --db=db_empty_payload.js $(find . -name '*.odocl') 2> /dev/null
 $ sherlodoc_index --format=js --index-docstring=false --db=db_no_docstring.js $(find . -name '*.odocl') 2> /dev/null
 $ sherlodoc_index --format=js --index-name=false --db=db_no_name.js $(find . -name '*.odocl') 2> /dev/null
@@ -31,7 +21,7 @@ $ sherlodoc_index --format=js --type-search=false --empty-payload --index-docstr
   $ gzip -k megaodocl
 
   $ du -s *.js *.gz
-  12	db.js
+  8	db.js
   8	db.js.gz
   8	megaodocl.gz
 

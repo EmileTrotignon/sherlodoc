@@ -2,6 +2,7 @@ module Elt = Elt
 module Types = Types
 module Storage_toplevel = Storage
 module Suffix_tree = Suffix_tree
+module Cache = Cache
 include Types
 module Occ = Int.Map
 
@@ -44,8 +45,8 @@ module Make (Storage : Storage.S) : S with type writer = Storage.writer = struct
       ; db_names = Suffix_tree.With_elts.export db_names
       }
     in
-    PPrint.ToChannel.pretty 0.8 120 stdout
-      (Suffix_tree.With_elts.pprint db.db_names) ;
+     (*PPrint.ToChannel.pretty 0.8 120 stdout
+      (Suffix_tree.With_occ.pprint db.db_types) ; *)
     Storage.save ~db:h db
 
   let store name elt ~count =

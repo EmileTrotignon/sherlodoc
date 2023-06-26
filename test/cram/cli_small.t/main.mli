@@ -1,9 +1,4 @@
 
-type 'a list
+type moo
 
-module List : sig
-  type 'a t = 'a list
-
-  val map : ('a -> 'b) -> 'a t -> 'b t
-end
-
+val v : moo
