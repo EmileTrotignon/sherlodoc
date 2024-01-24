@@ -1,5 +1,6 @@
   $ tar -xf odocls.tar
-  $ find ./docs/odoc/base/ -name '*.odocl' | sort
+  $ export ODOCLS=$(find ./docs/odoc/base/ -name '*.odocl' | sort)
+  $ echo $ODOCLS | sed "s/ /\n/g"
   ./docs/odoc/base/base.odocl
   ./docs/odoc/base/base__.odocl
   ./docs/odoc/base/base__Applicative.odocl
@@ -144,7 +145,7 @@
   ./docs/odoc/base/shadow_stdlib/shadow_stdlib.odocl
   $ export SHERLODOC_DB=db.bin
   $ export SHERLODOC_FORMAT=ancient
-  $ sherlodoc index --index-docstring=false $(find ./docs/odoc/base/ -name "*.odocl") > /dev/null
+  $ sherlodoc index --index-docstring=false $ODOCLS > /dev/null
   $ sherlodoc search --print-cost --limit 100 "S_poly"
   195 val Base.Set.S_poly.mem : 'a t -> 'a -> bool
   202 val Base.Hashtbl.S_poly.data : (_, 'b) t -> 'b list

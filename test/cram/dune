@@ -4,7 +4,8 @@
  (action
   (progn
    (run mkdir -p docs)
-   (run odig odoc --cache-dir=docs base)
+   (run odig odoc --cache-dir=docs alcotest ancient angstrom angstrom-lwt-unix arp asn1-combinators astring b0 base base64 bigarray-compat bigarray-overlap bigstringaf biniou bos brr camlp-streams caqti caqti-lwt checkseum chrome-trace cmdliner cppo crunch csexp cstruct cstruct-lwt dap decompress digestif domain-name dream dream-httpaf dream-pure dum dune dune-build-info dune-configurator dune-rpc duration dyn earlybird easy-format either eqaf ethernet faraday faraday-lwt faraday-lwt-unix fiber fix fmt fpath gen gg gluten gmap graphql graphql-lwt graphql_parser hkdf hmap ipaddr ipaddr-cstruct iter jane-street-headers js_of_ocaml js_of_ocaml-compiler js_of_ocaml-ppx js_of_ocaml-toplevel jst-config ke lambdasoup logs lru lwt lwt-dllist lwt_ppx lwt_react lwt_ssl macaddr macaddr-cstruct magic-mime markup mdx menhir menhirLib menhirSdk merlin-lib metrics mimic mirage-clock mirage-crypto mirage-crypto-ec mirage-crypto-pk mirage-crypto-rng mirage-crypto-rng-lwt mirage-flow mirage-kv mirage-net mirage-os-shim mirage-random mirage-time mtime multipart_form multipart_form-lwt note num ocaml ocaml-compiler-libs ocaml-lsp-server ocaml-syntax-shims ocaml-version ocamlbuild ocamlc-loc ocamlformat ocamlformat-lib ocamlformat-rpc-lib ocamlgraph ocp-indent ocplib-endian octavius odig odoc odoc-parser omd opam-core optint ordering parsexp path_glob pbkdf pecu pp pprint ppx_assert ppx_base ppx_blob ppx_cold ppx_compare ppx_derivers ppx_deriving ppx_deriving_yojson ppx_enumerate ppx_expect ppx_globalize ppx_hash ppx_here ppx_inline_test ppx_optcomp ppx_sexp_conv ppx_yojson_conv_lib ppxlib prettym psq ptime randomconv re react result rresult sedlex seq sexplib sexplib0 spawn ssl stdio stdlib-shims stdune stringext tcpip time_now tls tls-mirage topkg tyxml uchar unstrctrd uri uucp uunf uuseg uutf vg x509 xdg yojson zarith
+   )
    (run tar -cf odocls.tar docs/odoc))))
 
 (cram

@@ -1,5 +1,6 @@
   $ tar -xf odocls.tar
-  $ find ./docs/odoc/base/ -name '*.odocl' | sort
+  $ export ODOCLS=$(find ./docs/odoc/base/ -name '*.odocl' | sort)
+  $ echo $ODOCLS | sed "s/ /\n/g"
   ./docs/odoc/base/base.odocl
   ./docs/odoc/base/base__.odocl
   ./docs/odoc/base/base__Applicative.odocl
@@ -142,10 +143,10 @@
   ./docs/odoc/base/md5/md5_lib.odocl
   ./docs/odoc/base/page-index.odocl
   ./docs/odoc/base/shadow_stdlib/shadow_stdlib.odocl
-  $ cat $(find ./docs/odoc/base/ -name '*.odocl') > megaodocl
+  $ cat $ODOCLS > megaodocl
   $ du -sh megaodocl
   6.2M	megaodocl
-  $ sherlodoc index --index-docstring=true --index-name=true --type-search=true --format=js --db=db.js $(find ./docs/odoc/base/ -name '*.odocl') > /dev/null
+  $ sherlodoc index --index-docstring=true --index-name=true --type-search=true --format=js --db=db.js $ODOCLS > /dev/null
 
   $ gzip -k db.js
 
@@ -157,9 +158,9 @@ in queryable way, so a size increase is expected. It should just be reasonable.
   $ du -s *.js *.gz
   2284	db.js
   1724	db.js.gz
-  1776	megaodocl.gz
+  1760	megaodocl.gz
 
-  $ for f in $(find . -name '*.odocl'); do
+  $ for f in $ODOCLS; do
   >  odoc html-generate --search-uri=db.js --search-uri=sherlodoc.js --output-dir html $f
   > done
   $ odoc support-files -o html
@@ -176,10 +177,8 @@ a previous run. .js files built by dune are read only.
   highlight.pack.js
   katex.min.css
   katex.min.js
-  ocaml
   odoc.css
   odoc_search.js
-  sexplib0
   sherlodoc.js
 indent to see results
 $ cp -r html /tmp
