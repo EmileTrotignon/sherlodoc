@@ -21,7 +21,7 @@ let index_odoc_index_file register filename =
   | Error (`Msg msg) -> Format.printf "FILE ERROR %s: %s@." filename msg
   | Ok file ->
     (match Odoc_odoc.Odoc_file.load_index file with
-     | Ok entries -> Odoc_model.Paths.Identifier.Hashtbl.Any.iter register (snd entries)
+     | Ok entries -> Odoc_model.Paths.Identifier.Hashtbl.Any.iter register entries.index
      | Error (`Msg msg) -> Format.printf "Odoc warning or error %s: %s@." filename msg)
 
 let main
